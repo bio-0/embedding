@@ -41,8 +41,8 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
-src/python/models/
-src/python/sum-models/
+src/python/nomic-embed/
+src/python/umap-models/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/

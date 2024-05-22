@@ -1,23 +1,41 @@
-import stanza
 import os
-from transformers import pipeline
+from sentence_transformers import SentenceTransformer
+from umap.umap_ import UMAP
+import joblib
+import numpy as np
 
 
 def load_model():
-    model_lang = os.environ.get('STANZA_SERVER_LANGUAGES')
-    model_dir = os.environ.get('STANZA_RESOURCES_DIR')
-    sum_model_dir = os.environ.get('SUMMARY_RESOURCES_DIR')
-    # base model
-    stanza.download(model_lang, model_dir)
-    # processors
-    stanza.Pipeline(lang=model_lang,
-                    dir=model_dir,
-                    processors='tokenize,mwt,pos,lemma,ner,sentiment,depparse,coref',
-                    tokenize_no_ssplit=True,
-                    use_gpu=True)
+    model_dir = "nomic-embed"  # os.environ.get('NOMIC_RESOURCES_DIR')
     # summary download
-    pipe = pipeline(task="summarization", model="philschmid/bart-large-cnn-samsum", device=0)
-    pipe.save_pretrained(sum_model_dir)
+    model = SentenceTransformer("nomic-ai/nomic-embed-text-v1",
+                                revision='02d96723811f4bb77a80857da07eda78c1549a4d',
+                                trust_remote_code=True)
+    model.save(model_dir)
+    x_nom = np.genfromtxt('nomic_emb.csv', delimiter=",")
+    disp_model = UMAP(n_components=2,
+                      n_neighbors=15,
+                      random_state=42,
+                      min_dist=0.05,
+                      metric='cosine',
+                      n_jobs=1)
+
+    u = disp_model.fit_transform(x_nom)
+
+    filename = 'umap-models/umap-display.joblib'
+    joblib.dump(disp_model, filename)
+
+    clust_model = UMAP(n_components=8,
+                       n_neighbors=15,
+                       random_state=42,
+                       min_dist=0.0,
+                       metric='cosine',
+                       n_jobs=1)
+
+    u = clust_model.fit_transform(x_nom)
+
+    filename = 'umap-models/umap-cluster.joblib'
+    joblib.dump(disp_model, filename)
 
 
 if __name__ == '__main__':
