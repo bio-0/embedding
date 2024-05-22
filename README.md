@@ -1,2 +1,2 @@
-# stanza-rest
-@molfar stanza RESTfull service
+# embed-rest
+@molfar embedding RESTfull service
